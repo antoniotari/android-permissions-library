@@ -1,0 +1,60 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+android {
+
+    /**
+     * Default variant to publish to Maven
+     */
+    defaultPublishConfig "release"
+
+    compileSdkVersion 27
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            versionNameSuffix "-debug"
+        }
+    }
+
+    /**
+     * The following rule renames all builds by appending the versionName and versionCode to the .aar filename
+     */
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = applicationId + "-v${variant.getGenerateBuildConfig().versionName}-vc${defaultConfig.versionCode}.aar"
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "https://nexus.bellmedia.ca/repository/android/") {
+                authentication(userName: nexusUsername, password: nexusPassword)
+            }
+            pom.version = "${android.defaultConfig.versionName}"
+            pom.artifactId = "permissionshelper"
+            pom.groupId = "com.digiflare"
+        }
+    }
+}
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:27.1.0'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
